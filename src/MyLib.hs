@@ -2,7 +2,6 @@ module MyLib where
 
 import System.Directory
 import qualified Data.Text as T
-import Data.Text (Text)
 
 type Path = String
 type TagName = T.Text 
@@ -11,10 +10,23 @@ data Tag = Tag {
   html :: T.Text  
 }
 
+-- newline operator 
 (<#>) :: T.Text -> T.Text -> T.Text
 front <#> back = 
-  let newline = T.pack "\n"
-  in  front <> newline <> back
+  let nl = T.pack "\n"
+  in  front <> nl <> back
+
+newline :: T.Text -> T.Text
+newline = 
+  let nl = T.pack "\n"
+  in  flip (<>) nl
+
+increment :: T.Text -> T.Text
+increment = (T.pack "  " <>) 
+
+indentNewLine :: T.Text -> T.Text
+indentNewLine = (increment . newline)
+
 
 tag :: TagName -> T.Text 
 tag name = 
@@ -28,11 +40,12 @@ endTag name =
       cTag = T.pack "/>"
   in oTag <> name <> cTag 
 
-tags :: TagName -> T.Text
-tags name = tag name <> endTag name
+tags :: [T.Text] -> T.Text
+tags (x:xs) = tag x <> increment (tags xs) <> endTag x
+tags [] = T.empty
 
 template :: Tag
-template = Tag $ tag (T.pack "!DOCTYPE html")
+template = Tag $ tag (T.pack "!DOCTYPE html") <#> tags (T.pack "html")
 
 writeTemplate :: Path -> IO ()
 writeTemplate = 
