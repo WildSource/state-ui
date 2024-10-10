@@ -6,15 +6,11 @@ import qualified Data.Text as T
 type Path = String
 type TagName = T.Text 
 
-data Tag = Tag {
-  html :: T.Text  
-}
-
 -- newline operator 
 (<#>) :: T.Text -> T.Text -> T.Text
 front <#> back = 
   let nl = T.pack "\n"
-  in  front <> nl <> back
+  in  front <> nl <> (increment back)
 
 newline :: T.Text -> T.Text
 newline = 
@@ -40,19 +36,20 @@ endTag name =
       cTag = T.pack "/>"
   in oTag <> name <> cTag 
 
+nTags :: [T.Text] -> T.Text
+nTags (x:xs) = tag x <#> increment (tags xs) <#> endTag x
+nTags [] = T.empty
+
 tags :: [T.Text] -> T.Text
-tags (x:xs) = tag x <> increment (tags xs) <> endTag x
+tags (x:xs) = tag x <#> endTag x <> newline (tags xs)
 tags [] = T.empty
 
-template :: Tag
-template = Tag $ tag (T.pack "!DOCTYPE html") <#> tags (T.pack "html")
-
-writeTemplate :: Path -> IO ()
-writeTemplate = 
-  let content = T.pack "html"
-  in flip (writeFile) (T.unpack $ tags content) 
+template :: T.Text 
+template = 
+  tag (T.pack "!DOCTYPE html") <#> nTags (T.pack <$> ["html", "head", "body"])
 
 writeProject :: Path -> IO ()
 writeProject path = do
   createDirectory path
-  writeTemplate (path ++ "/index.html") 
+  writeFile (path ++ "/index.html") (T.unpack template) 
+
