@@ -1,0 +1,34 @@
+module Tags.Internal where
+
+import qualified Data.Text as T
+
+-- newline operator 
+(<#>) :: T.Text -> T.Text -> T.Text
+front <#> back = 
+  let nl = T.pack "\n"
+  in  front <> nl <> back 
+
+newline :: T.Text -> T.Text
+newline = 
+  let nl = T.pack "\n"
+  in  flip (<>) nl
+
+openingTag :: T.Text -> T.Text 
+openingTag name = 
+  let oTag = T.pack "<"
+      cTag = T.pack ">"
+  in oTag <> name <> cTag 
+
+closingTag :: T.Text -> T.Text 
+closingTag name = 
+  let oTag = T.pack "<"
+      cTag = T.pack "/>"
+  in oTag <> name <> cTag 
+
+tag :: T.Text -> T.Text -> T.Text
+tag name content 
+  | T.null content = openingTag name <> closingTag name 
+  | otherwise = openingTag name <> content <> closingTag name 
+
+multiPack :: [String] -> [T.Text]
+multiPack = fmap (T.pack) 
