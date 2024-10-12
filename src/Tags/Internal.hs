@@ -30,7 +30,7 @@ closingTag name =
 tag :: TagName -> T.Text -> T.Text
 tag name content
   | T.null content =  openingTag name <> closingTag name 
-  | otherwise = openingTag name <> content <> closingTag name 
+  | otherwise = openingTag name <#> content <#> closingTag name 
 
 multiPack :: [String] -> [T.Text]
 multiPack = fmap (T.pack) 

@@ -23,7 +23,7 @@ name:               state-ui
 version:            0.1.0.0
 
 -- A short (one-line) description of the package.
-synopsis:           Minimal Haskell web library similar to React.
+synopsis:           Minimal and simple Haskell web library.
 
 -- A longer description of the package.
 -- description:
@@ -59,7 +59,7 @@ library
     import:           warnings
 
     -- Modules exported by the library.
-    exposed-modules:  MyLib, Tags.Catalogue
+    exposed-modules: Tags.Catalogue
 
     -- Modules included in this library but not exported.
     other-modules: Tags.Internal

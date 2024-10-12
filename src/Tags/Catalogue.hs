@@ -21,15 +21,8 @@ title = applyContent tag "title"
 body :: T.Text -> T.Text
 body = applyComponent tag "body"
 
---Test part ---------------------------------
+p :: String -> T.Text
+p = applyContent tag "p"
 
-inHTML :: T.Text 
-inHTML = 
-  head (title "Example App") <#>
-  body T.empty 
-  
-
-app :: T.Text
-app =
-  docType <#>
-  html inHTML
+div :: T.Text -> T.Text
+div = applyComponent tag "div" 
