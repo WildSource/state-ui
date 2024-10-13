@@ -3,6 +3,8 @@ module Tags.Internal where
 import qualified Data.Text as T
 
 type TagName = T.Text
+type CSSid = T.Text
+type CSSClasses = [T.Text]
 
 -- newline operator 
 (<#>) :: T.Text -> T.Text -> T.Text
