@@ -5,6 +5,11 @@ import qualified Data.Text as T
 type TagName = T.Text
 type CSSid = T.Text
 type CSSClasses = [T.Text]
+type AttrName = T.Text
+type AttrValue = T.Text
+type Attribute = T.Text
+
+data Tag = Tag (TagName, [Attribute]) deriving Show 
 
 -- newline operator 
 (<#>) :: T.Text -> T.Text -> T.Text
@@ -12,16 +17,22 @@ front <#> back =
   let nl = T.pack "\n"
   in  front <> nl <> back 
 
+-- whitespace operator
+(<!>) :: T.Text -> T.Text -> T.Text
+front <!> back =
+  let ws = T.pack " "
+  in  front <> ws <> back 
+
 newline :: T.Text -> T.Text
 newline = 
   let nl = T.pack "\n"
   in  flip (<>) nl
 
-openingTag :: T.Text -> T.Text 
-openingTag name = 
+openingTag :: T.Text -> [Attribute] -> T.Text 
+openingTag name attr = 
   let oTag = T.pack "<"
       cTag = T.pack ">"
-  in oTag <> name <> cTag 
+  in oTag <> name <!> expandAttr attr <> cTag 
 
 closingTag :: T.Text -> T.Text 
 closingTag name = 
@@ -29,10 +40,20 @@ closingTag name =
       cTag = T.pack ">"
   in oTag <> name <> cTag 
 
-tag :: TagName -> T.Text -> T.Text
-tag name content
-  | T.null content =  openingTag name <> closingTag name 
-  | otherwise = openingTag name <#> content <#> closingTag name 
+tag :: [Tag] -> T.Text
+tag ((Tag (name, attr)):xs) = 
+  openingTag name attr <#> tag xs <#> closingTag name
+tag [] = T.empty
+
+attribute :: AttrName -> AttrValue -> T.Text
+attribute n v = 
+  let assign = (T.pack "=")
+  in  n <> assign <> v
+
+expandAttr :: [Attribute] -> T.Text
+expandAttr = 
+  let ws = T.pack " "
+  in  T.intercalate ws   
 
 multiPack :: [String] -> [T.Text]
 multiPack = fmap (T.pack) 
