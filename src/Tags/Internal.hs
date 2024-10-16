@@ -40,10 +40,21 @@ closingTag name =
       cTag = T.pack ">"
   in oTag <> name <> cTag 
 
-tag :: [Tag] -> T.Text
-tag ((Tag (name, attr)):xs) = 
-  openingTag name attr <#> tag xs <#> closingTag name
-tag [] = T.empty
+nestTag :: [Tag] -> T.Text
+nestTag ((Tag (name, attr)):xs) = 
+  openingTag name attr <#> nestTag xs <#> closingTag name
+nestTag [] = T.empty
+
+expandTag :: [Tag] -> T.Text
+expandTag ((Tag (name, attr)):xs) = 
+  openingTag name attr <#> closingTag name <#> expandTag xs 
+expandTag [] = T.empty
+
+tags :: [Either Tag [Tag]] -> T.Text
+tags ((Left (Tag (name, attr))):xs) = openingTag name attr <#> closingTag name <#> tags xs 
+tags ((Right x):xs) = nestTag x <#> tags xs
+tags [] = T.empty
+
 
 attribute :: AttrName -> AttrValue -> T.Text
 attribute n v = 
@@ -58,12 +69,24 @@ expandAttr =
 multiPack :: [String] -> [T.Text]
 multiPack = fmap (T.pack) 
 
--- nests other tags (T.Text)
-applyComponent :: (T.Text -> T.Text -> T.Text) -> String -> T.Text -> T.Text
-applyComponent f str t = f (T.pack str) t
+-- test purposes -------------------------------
 
--- writes content inside tag (String)
-applyContent:: (T.Text -> T.Text -> T.Text) -> String -> String -> T.Text
-applyContent f t t' = f (T.pack t) (T.pack t')
+doctype :: T.Text
+doctype = T.pack "<!DOCTYPE html>"
 
+htmlTag :: Tag
+htmlTag = 
+  Tag ((T.pack "html"), [])
 
+headTag :: Tag
+headTag = 
+  Tag ((T.pack "head"), []) 
+
+bodyTag :: Tag
+bodyTag = 
+  Tag ((T.pack "body"), []) 
+
+app :: T.Text
+app = 
+  doctype <#>
+  tags [Right [[htmlTag, headTag, bodyTag]] 
